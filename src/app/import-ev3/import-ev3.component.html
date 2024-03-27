@@ -1,0 +1,43 @@
+<div class="flex p-4 w-full">
+	<div class="bg-blue-50 rounded-xl w-full p-4">
+		<p class="my-2">Please choose .ev3 file</p>
+		<!-- create file input to upload file and pass to component function -->
+		<input type="file" (change)="onFileChange($event)" />
+		<div class="p-4 w-full">
+			<!-- display the file name -->
+			<p><strong>Name:</strong> {{file?.name}}</p>
+			<p><strong>Last Modifield:</strong> {{file?.lastModified | date}}</p>
+			<p><strong>Size:</strong> {{file?.size}}</p>
+		</div>
+	</div>
+</div>
+<div class="flex p-4 w-full">
+	<div class="bg-blue-50 rounded-xl w-full p-4">
+		<div class="p-4 w-full">
+			<ng-container *ngIf="dataRows && dataRows.length > 0">
+				<!-- display the data rows -->
+				<table class="auto">
+					<ng-container *ngFor="let row of dataRows">
+						<tr>
+							<!-- <td>{{row| json}}</td> -->
+							<td>{{row.SessionNumber}}</td>
+							<td>{{row.SessionDay}}</td>
+							<td>{{row.Event}}</td>
+							<td>{{row.SubEvent}}</td>
+							<td>{{row.PrelimFinal}}</td>
+							<td>{{row.IndRelay}}</td>
+							<td>{{row.Gender}}</td>
+							<td>{{row.AgeFrom}}</td>
+							<td>{{row.AgeTo}}</td>
+							<td>{{row.Distance}}</td>
+							<td>{{row.Stroke}}</td>
+							<td>{{row.FasterThanLC}}</td>
+							<td>{{row.FasterThanSC}}</td>
+							<td>{{row.StartTime}}</td>
+							<td>{{row.Course}}</td>
+						</tr>
+					</ng-container>
+				</table>
+			</ng-container>
+		</div>
+	</div>
