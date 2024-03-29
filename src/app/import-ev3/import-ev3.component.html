@@ -17,25 +17,56 @@
 			<ng-container *ngIf="dataRows && dataRows.length > 0">
 				<!-- display the data rows -->
 				<table class="auto">
-					<ng-container *ngFor="let row of dataRows">
+					<thead>
 						<tr>
-							<!-- <td>{{row| json}}</td> -->
-							<td>{{row.SessionNumber}}</td>
-							<td>{{row.SessionDay}}</td>
-							<td>{{row.Event}}</td>
-							<td>{{row.SubEvent}}</td>
-							<td>{{row.PrelimFinal}}</td>
-							<td>{{row.IndRelay}}</td>
-							<td>{{row.Gender}}</td>
-							<td>{{row.AgeFrom}}</td>
-							<td>{{row.AgeTo}}</td>
-							<td>{{row.Distance}}</td>
-							<td>{{row.Stroke}}</td>
-							<td>{{row.FasterThanLC}}</td>
-							<td>{{row.FasterThanSC}}</td>
-							<td>{{row.StartTime}}</td>
-							<td>{{row.Course}}</td>
+							<th class="mx-2">SessionNumber</th>
+							<th class="mx-2">Event</th>
+							<th class="mx-2">SubEvent</th>
+							<th class="mx-2">PrelimFinal</th>
+							<th class="mx-2">IndRelay</th>
+							<th class="mx-2">Gender</th>
+							<th class="mx-2">AgeFrom</th>
+							<th class="mx-2">AgeTo</th>
+							<th class="mx-2">Distance</th>
+							<th class="mx-2">Stroke</th>
+							<th class="mx-2">FasterThanLC</th>
+							<th class="mx-2">FasterThanSC</th>
+							<th class="mx-2">StartTime</th>
+							<th class="mx-2">Course</th>
 						</tr>
+					</thead>
+					<ng-container *ngFor="let row of dataRows">
+						<tbody>
+							<tr class="mx-2">
+								<!-- <td>{{row| json}}</td> -->
+								<td class="mx-2">{{row.SessionNumber}}</td>
+								<td class="mx-2">{{row.Event}}</td>
+								<td class="mx-2">{{row.SubEvent}}</td>
+								<td class="mx-2">{{row.PrelimFinal}}</td>
+								<td class="mx-2">{{row.IndRelay}}</td>
+								<td class="mx-2">{{row.Gender}}</td>
+								<td class="mx-2">{{row.AgeFrom}}</td>
+								<td class="mx-2">{{row.AgeTo}}</td>
+								<td class="mx-2">{{row.Distance}}</td>
+								<td>
+									<ng-container [ngSwitch]="row.Stroke">
+										<p *ngSwitchCase="'A'">Freestyle</p>
+										<p *ngSwitchCase="'B'">Backstroke</p>
+										<p *ngSwitchCase="'C'">Breaststroke</p>
+										<p *ngSwitchCase="'D'">Butterfly</p>
+										<p *ngSwitchCase="'E'">Individual Medley</p>
+										<p *ngSwitchCase="'F'">Freestyle Relay</p>
+										<p *ngSwitchCase="'G'">Medley Relay</p>
+										<p *ngSwitchDefault>Unknown</p>
+									</ng-container>
+									<!-- {{row.Stroke}} -->
+								</td>
+								<td class="mx-2">{{row.FasterThanLC}}</td>
+								<td class="mx-2">{{row.FasterThanSC}}</td>
+								<td class="mx-2">{{row.StartTime}}</td>
+								<td class="mx-2">{{row.Course}}</td>
+							</tr>
+						</tbody>
 					</ng-container>
 				</table>
 			</ng-container>

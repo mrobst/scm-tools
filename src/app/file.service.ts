@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Data } from '@angular/router';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export type HeaderRow = {
   [key: string]: string;
@@ -17,7 +18,7 @@ export type DataRow = {
   PrelimFinal: 'P' | 'F'; // Prelim or Final
   Rounds: number;
   IndRelay: 'I' | 'R'; // Individual
-  Gender: 'G' | 'B'; // Girls or Boys
+  Gender: 'G' | 'B' | 'W' | 'M'; // Girls or Boys // Woman or Man
   AgeFrom: number;
   AgeTo: number;
   Distance: number;
@@ -39,6 +40,18 @@ export type DataRow = {
   MaxIndEntries: number;
   MaxRelayEntries: number;
   RelayLegs: number;
+};
+
+type SCMStrokes = 'Free' | 'Back' | 'Breast' | 'Fly' | 'Medley';
+
+export type QTFileRow = {
+  poolSize: 25 | 50;
+  stroke: SCMStrokes | undefined;
+  distance: number; // validate?
+  ageFrom: number;
+  ageTo: number;
+  gender: 'M' | 'F';
+  time: string; // mm:ss.SS
 };
 
 @Injectable({
@@ -116,9 +129,9 @@ export class FileService {
         FasterThanLC: dataCols[16],
         SlowerThanSC: dataCols[17],
         FasterThanSC: dataCols[18],
-        SessionNumber: Number(dataCols[19]),
+        SessionDay: Number(dataCols[19]),
         EventOrder: Number(dataCols[20]),
-        SessionDay: Number(dataCols[21]),
+        SessionNumber: Number(dataCols[21]),
         // what is col 22?
         // what is col 23?
         StartTime: dataCols[24],
@@ -131,6 +144,129 @@ export class FileService {
       return dataRow;
     } else {
       return {} as DataRow;
+    }
+  }
+
+  // create QT formatted xlsx for import into SCM
+
+  // Pool Size	Stroke	Distance	Age From	Age To	Gender	Time
+  // 25	Free	50	9	9	M	01:02.03
+  // 25	Free	50	9	9	F	03:04.05
+
+  createQTFileData(event: DataRow[]): QTFileRow[] {
+    const QTFileData: QTFileRow[] = [];
+
+    event.forEach((row) => {
+      // create SC row
+      const QTRowSC: QTFileRow = {
+        poolSize: 25,
+        stroke: this.convertEV3Stroke(row.Stroke),
+        distance: row.Distance,
+        ageFrom: row.AgeFrom,
+        ageTo: row.AgeTo,
+        gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
+        time: row.FasterThanSC,
+      };
+      QTFileData.push(QTRowSC);
+      // create LC row
+      const QTRowLC: QTFileRow = {
+        poolSize: 50,
+        stroke: this.convertEV3Stroke(row.Stroke),
+        distance: row.Distance,
+        ageFrom: row.AgeFrom,
+        ageTo: row.AgeTo,
+        gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
+        time: row.FasterThanLC,
+      };
+      QTFileData.push(QTRowLC);
+    });
+
+    return QTFileData;
+  }
+
+  convertQTFileDataToXLSX(qtFileData: QTFileRow[]): void {
+    // Prepare new workbook
+    let workbook = new Workbook();
+    let worksheet = workbook.addWorksheet('QTs');
+
+    // Write the headers
+    const headerRow = worksheet.addRow([
+      'Pool Size',
+      'Stroke',
+      'Distance',
+      'Age From',
+      'Age To',
+      'Gender',
+      'Time',
+    ]);
+    headerRow.font = { bold: true };
+
+    // Format columns
+    worksheet.getColumn(1).width = 10; // Pool Size
+    worksheet.getColumn(2).width = 10; // Stroke
+    worksheet.getColumn(3).width = 10; // Distance
+    worksheet.getColumn(4).width = 10; // Age From
+    worksheet.getColumn(5).width = 10; // Age To
+    worksheet.getColumn(6).width = 10; // Gender
+    worksheet.getColumn(7).width = 20; // Time
+
+    // Write the data
+    qtFileData.forEach((row) =>
+      worksheet.addRow([
+        row.poolSize,
+        row.stroke,
+        row.distance,
+        row.ageFrom,
+        row.ageTo,
+        row.gender,
+        row.time,
+      ])
+    );
+
+    workbook.xlsx.writeBuffer().then(async (data) => {
+      // use proper mimetype for Android file opener
+      let blob = new Blob([data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      // function to convert number to 2 digits for months
+      const number2digits = (num: number) => {
+        return num.toLocaleString('en-US', {
+          minimumIntegerDigits: 2,
+          useGrouping: false,
+        });
+      };
+
+      // calculate the current year-mm-dd for the file name
+      const dynamicFileName =
+        new Date().getFullYear() +
+        '-' +
+        number2digits(new Date().getMonth() + 1) +
+        '-' +
+        number2digits(new Date().getDate());
+
+      saveAs(blob, `SCM-QT-Import ${dynamicFileName}.xlsx`);
+      console.log('xlsx saved');
+    });
+    // this.downloading = false;
+  }
+
+  convertEV3Stroke(
+    stroke: 'A' | 'B' | 'C' | 'D' | 'E'
+  ): SCMStrokes | undefined {
+    switch (stroke) {
+      case 'A':
+        return 'Free';
+      case 'B':
+        return 'Back';
+      case 'C':
+        return 'Breast';
+      case 'D':
+        return 'Fly';
+      case 'E':
+        return 'Medley';
+      default:
+        return undefined;
     }
   }
 }
