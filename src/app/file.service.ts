@@ -157,6 +157,7 @@ export class FileService {
     const QTFileData: QTFileRow[] = [];
 
     event.forEach((row) => {
+      if (!(row.Distance > 0)) return; // temp get rid of empty rows
       // create SC row
       const QTRowSC: QTFileRow = {
         poolSize: 25,
@@ -165,7 +166,7 @@ export class FileService {
         ageFrom: row.AgeFrom,
         ageTo: row.AgeTo,
         gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
-        time: row.FasterThanSC,
+        time: this.convertEV3Time(row.FasterThanSC),
       };
       QTFileData.push(QTRowSC);
       // create LC row
@@ -176,7 +177,7 @@ export class FileService {
         ageFrom: row.AgeFrom,
         ageTo: row.AgeTo,
         gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
-        time: row.FasterThanLC,
+        time: this.convertEV3Time(row.FasterThanLC),
       };
       QTFileData.push(QTRowLC);
     });
@@ -249,6 +250,22 @@ export class FileService {
       console.log('xlsx saved');
     });
     // this.downloading = false;
+  }
+
+  convertEV3Time(time: string): string {
+    // if time is ss.SS, convert to mm:ss.SS
+    if (time.length <= 5) {
+      const seconds = time.split('.')[0];
+      const milliseconds = time.split('.')[1];
+      const minutes = Math.floor(Number(seconds) / 60)
+        .toString()
+        .padStart(2, '0');
+      const remainingSeconds = Number(seconds) % 60;
+      const formattedTime = `${minutes}:${remainingSeconds}.${milliseconds}`;
+      return formattedTime;
+    } else {
+      return time.toString().padStart(8, '0');
+    }
   }
 
   convertEV3Stroke(
