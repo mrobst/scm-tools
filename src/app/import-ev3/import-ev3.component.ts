@@ -26,4 +26,9 @@ export class ImportEv3Component {
     this.headerRow = rowsAsJSON[0] as HeaderRow;
     this.dataRows = rowsAsJSON.slice(1) as DataRow[];
   }
+
+  createQTFile() {
+    const qtFileData = this.fileService.createQTFileData(this.dataRows);
+    this.fileService.convertQTFileDataToXLSX(qtFileData);
+  }
 }
