@@ -1,5 +1,10 @@
-<div class="flex flex-row gap-2 p-4 pb-10">
-	<a routerLink="/">Home</a>
-	<a routerLink="/import-ev3">Import</a>
-</div>
+<nav class="flex p-4 pb-10">
+	<ul class="flex flex-row gap-2">
+		<li>
+			<a routerLink="/" routerLinkActive="active">Home</a>
+		</li>
+		<li><a routerLink="/import-ev3" routerLinkActive="active">Import</a>
+		</li>
+	</ul>
+</nav>
 <router-outlet />
