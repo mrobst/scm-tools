@@ -169,17 +169,19 @@ export class FileService {
         time: this.convertEV3Time(row.FasterThanSC),
       };
       QTFileData.push(QTRowSC);
-      // create LC row
-      const QTRowLC: QTFileRow = {
-        poolSize: 50,
-        stroke: this.convertEV3Stroke(row.Stroke),
-        distance: row.Distance,
-        ageFrom: row.AgeFrom,
-        ageTo: row.AgeTo,
-        gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
-        time: this.convertEV3Time(row.FasterThanLC),
-      };
-      QTFileData.push(QTRowLC);
+      // create LC row if it exists
+      if (row.FasterThanLC) {
+        const QTRowLC: QTFileRow = {
+          poolSize: 50,
+          stroke: this.convertEV3Stroke(row.Stroke),
+          distance: row.Distance,
+          ageFrom: row.AgeFrom,
+          ageTo: row.AgeTo,
+          gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
+          time: this.convertEV3Time(row.FasterThanLC),
+        };
+        QTFileData.push(QTRowLC);
+      }
     });
 
     return QTFileData;
