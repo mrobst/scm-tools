@@ -18,7 +18,7 @@ export type DataRow = {
   PrelimFinal: 'P' | 'F'; // Prelim or Final
   Rounds: number;
   IndRelay: 'I' | 'R'; // Individual
-  Gender: 'G' | 'B' | 'W' | 'M'; // Girls or Boys // Woman or Man
+  Gender: 'G' | 'B' | 'W' | 'M' | 'X'; // Girls or Boys // Woman or Man
   AgeFrom: number;
   AgeTo: number;
   Distance: number;
@@ -50,7 +50,7 @@ export type QTFileRow = {
   distance: number; // validate?
   ageFrom: number;
   ageTo: number;
-  gender: 'M' | 'F';
+  gender: 'M' | 'F' | 'X';
   time: string; // mm:ss.SS
 };
 
@@ -115,7 +115,7 @@ export class FileService {
         PrelimFinal: dataCols[2] as 'P' | 'F', // Prelim or Final
         Rounds: Number(dataCols[3]),
         IndRelay: dataCols[4] as 'I' | 'R', // Individual
-        Gender: dataCols[5] as 'G' | 'B',
+        Gender: dataCols[5] as 'G' | 'B', // X = mixed
         AgeFrom: Number(dataCols[6]),
         AgeTo: Number(dataCols[7]),
         Distance: Number(dataCols[8]),
@@ -158,18 +158,25 @@ export class FileService {
 
     event.forEach((row) => {
       if (!(row.Distance > 0)) return; // temp get rid of empty rows
-      // create SC row
-      const QTRowSC: QTFileRow = {
-        poolSize: 25,
-        stroke: this.convertEV3Stroke(row.Stroke),
-        distance: row.Distance,
-        ageFrom: row.AgeFrom,
-        ageTo: row.AgeTo,
-        gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
-        time: this.convertEV3Time(row.FasterThanSC),
-      };
-      QTFileData.push(QTRowSC);
-      // create LC row if it exists
+      // create SC row if there is SC QT
+      if (row.FasterThanSC) {
+        const QTRowSC: QTFileRow = {
+          poolSize: 25,
+          stroke: this.convertEV3Stroke(row.Stroke),
+          distance: row.Distance,
+          ageFrom: row.AgeFrom,
+          ageTo: row.AgeTo,
+          gender:
+            row.Gender === 'X'
+              ? 'X'
+              : row.Gender === 'G' || row.Gender === 'W'
+              ? 'F'
+              : 'M',
+          time: this.convertEV3Time(row.FasterThanSC),
+        };
+        QTFileData.push(QTRowSC);
+      }
+      // create LC row if there is LC QT
       if (row.FasterThanLC) {
         const QTRowLC: QTFileRow = {
           poolSize: 50,
@@ -177,7 +184,12 @@ export class FileService {
           distance: row.Distance,
           ageFrom: row.AgeFrom,
           ageTo: row.AgeTo,
-          gender: row.Gender === 'G' || row.Gender === 'W' ? 'F' : 'M',
+          gender:
+            row.Gender === 'X'
+              ? 'X'
+              : row.Gender === 'G' || row.Gender === 'W'
+              ? 'F'
+              : 'M',
           time: this.convertEV3Time(row.FasterThanLC),
         };
         QTFileData.push(QTRowLC);
@@ -256,6 +268,9 @@ export class FileService {
 
   convertEV3Time(time: string): string {
     // if time is ss.SS, convert to mm:ss.SS
+    if (!time.split('.')?.[1]) {
+      return '00:00.00';
+    }
     if (time.length <= 5) {
       const seconds = time.split('.')[0];
       const milliseconds = time.split('.')[1];
