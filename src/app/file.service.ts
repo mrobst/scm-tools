@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Workbook } from 'exceljs';
-import { saveAs } from 'file-saver';
+import { Injectable } from "@angular/core";
+import { Workbook } from "exceljs";
+import { saveAs } from "file-saver";
 
 export type HeaderRow = {
   [key: string]: string;
@@ -15,14 +15,14 @@ export type HeaderRow = {
 export type DataRow = {
   Event: number;
   SubEvent: string;
-  PrelimFinal: 'P' | 'F'; // Prelim or Final
+  PrelimFinal: "P" | "F"; // Prelim or Final
   Rounds: number;
-  IndRelay: 'I' | 'R'; // Individual
-  Gender: 'G' | 'B' | 'W' | 'M' | 'X'; // Girls or Boys // Woman or Man
+  IndRelay: "I" | "R"; // Individual
+  Gender: "G" | "B" | "W" | "M" | "X"; // Girls or Boys // Woman or Man
   AgeFrom: number;
   AgeTo: number;
   Distance: number;
-  Stroke: 'A' | 'B' | 'C' | 'D' | 'E'; // A=Free, B=Back, C=Breast, D=Fly, E=IM
+  Stroke: "A" | "B" | "C" | "D" | "E"; // A=Free, B=Back, C=Breast, D=Fly, E=IM
   DivCode: string;
   DivDesc: string;
   EventType2: string;
@@ -31,18 +31,18 @@ export type DataRow = {
   FasterThanLC: string;
   SlowerThanSC: string;
   FasterThanSC: string;
-  SessionNumber: number;
+  SessionNumber: string;
   EventOrder: number;
   SessionDay: number;
   StartTime: string;
-  Course: 'L' | 'S'; // Long or Short
+  Course: "L" | "S"; // Long or Short
   MaxEntries: number;
   MaxIndEntries: number;
   MaxRelayEntries: number;
   RelayLegs: number;
 };
 
-type SCMStrokes = 'Free' | 'Back' | 'Breast' | 'Fly' | 'Medley';
+type SCMStrokes = "Free" | "Back" | "Breast" | "Fly" | "Medley";
 
 export type QTFileRow = {
   poolSize: 25 | 50;
@@ -50,12 +50,12 @@ export type QTFileRow = {
   distance: number; // validate?
   ageFrom: number;
   ageTo: number;
-  gender: 'M' | 'F' | 'X';
+  gender: "M" | "F" | "X";
   time: string; // mm:ss.SS
 };
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: "root",
 })
 export class FileService {
   constructor() {}
@@ -77,7 +77,7 @@ export class FileService {
   }
 
   convertToArray(contents: string): string[] {
-    const rows = contents.split('\n');
+    const rows = contents.split("\n");
     console.log(rows.slice(0, 5));
     return rows;
   }
@@ -93,33 +93,33 @@ export class FileService {
   }
 
   convertHeaderRow(row: string): HeaderRow {
-    const headerCols = row.split(';');
+    const headerCols = row.split(";");
     console.log(headerCols);
     let headerRow: HeaderRow = {};
     headerCols.forEach((col, index) => {
       headerCols[index] = col.trim();
-      index == 0 ? (headerRow['id'] = col) : (headerRow[col] = '');
-      index == 0 ? (headerRow['id'] = col) : (headerRow[col] = '');
+      index == 0 ? (headerRow["id"] = col) : (headerRow[col] = "");
+      index == 0 ? (headerRow["id"] = col) : (headerRow[col] = "");
     });
     return headerRow;
   }
 
   convertDataRow(row: string): DataRow {
-    const dataCols1 = row.split('*>');
-    const dataCols = dataCols1[0].split(';');
+    const dataCols1 = row.split("*>");
+    const dataCols = dataCols1[0].split(";");
     if (dataCols.length > 3) {
       let dataRow: DataRow = {
         // convert the data to the correct type based on the column order
         Event: Number(dataCols[0]),
         SubEvent: dataCols[1],
-        PrelimFinal: dataCols[2] as 'P' | 'F', // Prelim or Final
+        PrelimFinal: dataCols[2] as "P" | "F", // Prelim or Final
         Rounds: Number(dataCols[3]),
-        IndRelay: dataCols[4] as 'I' | 'R', // Individual
-        Gender: dataCols[5] as 'G' | 'B', // X = mixed
+        IndRelay: dataCols[4] as "I" | "R", // Individual
+        Gender: dataCols[5] as "G" | "B", // X = mixed
         AgeFrom: Number(dataCols[6]),
         AgeTo: Number(dataCols[7]),
         Distance: Number(dataCols[8]),
-        Stroke: dataCols[9] as 'A' | 'B' | 'C' | 'D' | 'E',
+        Stroke: dataCols[9] as "A" | "B" | "C" | "D" | "E",
         // what is col 10?
         DivCode: dataCols[11],
         DivDesc: dataCols[12],
@@ -131,11 +131,11 @@ export class FileService {
         FasterThanSC: dataCols[18],
         SessionDay: Number(dataCols[19]),
         EventOrder: Number(dataCols[20]),
-        SessionNumber: Number(dataCols[21]),
+        SessionNumber: dataCols[21],
         // what is col 22?
         // what is col 23?
         StartTime: dataCols[24],
-        Course: dataCols[25] as 'L' | 'S',
+        Course: dataCols[25] as "L" | "S",
         MaxEntries: Number(dataCols[26]),
         MaxIndEntries: Number(dataCols[27]),
         MaxRelayEntries: Number(dataCols[28]),
@@ -167,11 +167,11 @@ export class FileService {
           ageFrom: row.AgeFrom,
           ageTo: row.AgeTo,
           gender:
-            row.Gender === 'X'
-              ? 'X'
-              : row.Gender === 'G' || row.Gender === 'W'
-              ? 'F'
-              : 'M',
+            row.Gender === "X"
+              ? "X"
+              : row.Gender === "G" || row.Gender === "W"
+              ? "F"
+              : "M",
           time: this.convertEV3Time(row.FasterThanSC),
         };
         QTFileData.push(QTRowSC);
@@ -185,11 +185,11 @@ export class FileService {
           ageFrom: row.AgeFrom,
           ageTo: row.AgeTo,
           gender:
-            row.Gender === 'X'
-              ? 'X'
-              : row.Gender === 'G' || row.Gender === 'W'
-              ? 'F'
-              : 'M',
+            row.Gender === "X"
+              ? "X"
+              : row.Gender === "G" || row.Gender === "W"
+              ? "F"
+              : "M",
           time: this.convertEV3Time(row.FasterThanLC),
         };
         QTFileData.push(QTRowLC);
@@ -202,17 +202,17 @@ export class FileService {
   convertQTFileDataToXLSX(qtFileData: QTFileRow[]): void {
     // Prepare new workbook
     let workbook = new Workbook();
-    let worksheet = workbook.addWorksheet('QTs');
+    let worksheet = workbook.addWorksheet("QTs");
 
     // Write the headers
     const headerRow = worksheet.addRow([
-      'Pool Size',
-      'Stroke',
-      'Distance',
-      'Age From',
-      'Age To',
-      'Gender',
-      'Time',
+      "Pool Size",
+      "Stroke",
+      "Distance",
+      "Age From",
+      "Age To",
+      "Gender",
+      "Time",
     ]);
     headerRow.font = { bold: true };
 
@@ -241,12 +241,12 @@ export class FileService {
     workbook.xlsx.writeBuffer().then(async (data) => {
       // use proper mimetype for Android file opener
       let blob = new Blob([data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
 
       // function to convert number to 2 digits for months
       const number2digits = (num: number) => {
-        return num.toLocaleString('en-US', {
+        return num.toLocaleString("en-US", {
           minimumIntegerDigits: 2,
           useGrouping: false,
         });
@@ -255,50 +255,50 @@ export class FileService {
       // calculate the current year-mm-dd for the file name
       const dynamicFileName =
         new Date().getFullYear() +
-        '-' +
+        "-" +
         number2digits(new Date().getMonth() + 1) +
-        '-' +
+        "-" +
         number2digits(new Date().getDate());
 
       saveAs(blob, `SCM-QT-Import ${dynamicFileName}.xlsx`);
-      console.log('xlsx saved');
+      console.log("xlsx saved");
     });
     // this.downloading = false;
   }
 
   convertEV3Time(time: string): string {
     // if time is ss.SS, convert to mm:ss.SS
-    if (!time.split('.')?.[1]) {
-      return '00:00.00';
+    if (!time.split(".")?.[1]) {
+      return "00:00.00";
     }
     if (time.length <= 5) {
-      const seconds = time.split('.')[0];
-      const milliseconds = time.split('.')[1];
+      const seconds = time.split(".")[0];
+      const milliseconds = time.split(".")[1];
       const minutes = Math.floor(Number(seconds) / 60)
         .toString()
-        .padStart(2, '0');
+        .padStart(2, "0");
       const remainingSeconds = Number(seconds) % 60;
       const formattedTime = `${minutes}:${remainingSeconds}.${milliseconds}`;
       return formattedTime;
     } else {
-      return time.toString().padStart(8, '0');
+      return time.toString().padStart(8, "0");
     }
   }
 
   convertEV3Stroke(
-    stroke: 'A' | 'B' | 'C' | 'D' | 'E'
+    stroke: "A" | "B" | "C" | "D" | "E"
   ): SCMStrokes | undefined {
     switch (stroke) {
-      case 'A':
-        return 'Free';
-      case 'B':
-        return 'Back';
-      case 'C':
-        return 'Breast';
-      case 'D':
-        return 'Fly';
-      case 'E':
-        return 'Medley';
+      case "A":
+        return "Free";
+      case "B":
+        return "Back";
+      case "C":
+        return "Breast";
+      case "D":
+        return "Fly";
+      case "E":
+        return "Medley";
       default:
         return undefined;
     }
